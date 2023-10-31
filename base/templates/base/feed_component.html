@@ -1,0 +1,19 @@
+<div>
+    {% for post in posts %}
+        <div>
+
+            {% if request.user == post.host %}
+            <a href="{% url 'update-post' post.id %}">Edit</a>
+            <a href="{% url 'delete-post' post.id %}">Delete</a>
+            {% endif %}
+            <a href="{% url 'profile' post.host.id %}">@{{post.host.username}}</a>
+            <h5>{{post.id}} -- <a href="{% url 'post' post.id %}">{{post.name}}</a></h5>
+            <small>{{post.topic.name}}</small> 
+            <div id="like-section">
+                {% include 'base/like_section.html' %}
+            </div>
+           
+            <hr>
+        </div>
+    {% endfor %}
+</div>
