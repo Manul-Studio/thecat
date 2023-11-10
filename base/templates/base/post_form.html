@@ -1,13 +1,28 @@
 {% extends 'main.html' %}
 
 {% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-sm-4">
+        {% if form %}
+        <form method="POST">
+                {% csrf_token %}
+                {{form.as_p}}
+            <button type="submit" class="btn btn-secondary">Post</button>
+            </fieldset>
+        </form>
 
-<div>
+        {% endif %}
+        </div>
+        </div>
+        </div>
+
+<!-- <div>
     <form method="POST" action="">
         {% csrf_token %}
         {{form.as_p}}
         <input type="submit" value="Submit" />
     </form>
-</div>
+</div> -->
 
 {% endblock content %}

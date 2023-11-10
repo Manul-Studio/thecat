@@ -11,11 +11,18 @@
 </form>
 {% endif %} -->
 
-<div class="bg-light py-2 px-3 ml-2 mb-1" style="display: inline-block; border-radius: 20px;">
-   
-    <button type="submit" id="{{ post.pk }}" data-url="{% url 'like-post' %}" class="btn border-0 likebtn m-0 p-0">
-        Like
-    </button>
 
+    
+<div class="bg-light py-2 px-3 ml-2 mb-1" style="display: inline-block; border-radius: 20px;">
+   {% if flag %}
+    <button type="submit" id="{{ post.pk }}" data-url="{% url 'like-post' %}" class="btn border-0 likebtn m-0 p-0">
+        <i class="bi bi-heart-fill"></i>
+    </button>
+    {% else %}
+    <button type="submit" id="{{ post.pk }}" data-url="{% url 'like-post' %}" class="btn border-0 likebtn m-0 p-0">
+        <i class="bi bi-heart"></i>
+    </button>
+    {% endif %}
     <span id="like_count{{post.pk}}" class="like_count mt-3 pl-2">{{post.total_likes}}</span>             
 </div>
+

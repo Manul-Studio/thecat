@@ -7,8 +7,7 @@ from django.db.models import Q
 from .models import Post, Topic, User, Message, Profile
 from django.contrib.auth import authenticate, login, logout
 from django.shortcuts import get_object_or_404
-
-from .forms import PostForm, MyUserCreationForm
+from .forms import PostForm, MyUserCreationForm, ProfilePicForm
 
 
 def loginPage(request):
@@ -49,10 +48,11 @@ def registerPage(request):
     if request.method == 'POST':
         form = MyUserCreationForm(request.POST)
         if form.is_valid():
-            user = form.save(commit=False)
+            user = form.save(commit=False) #freezing data, example user added username uppercase so we want to make username lowercase
             user.username = user.username.lower()
             user.save()
             login(request, user)
+            messages.success(request, ("You have successfully registered!"))
             return redirect('home')
         else:
             messages.error(request, 'An error occurred during registration')
@@ -67,18 +67,22 @@ def home(request):
     posts = Post.objects.filter(
         Q(topic__name__icontains=q) |  # to albo to
         Q(name__icontains=q) |
-        Q(description__icontains=q)
+        Q(description__icontains=q)|
+        Q(host__name__icontains=q)
 
     )
+    
 
     topics = Topic.objects.all()
     post_count = posts.count()
-
+    
+   
+   
     # only activity related to the topic
     post_messages = Message.objects.filter(Q(post__topic__name__icontains=q))
 
     context = {'posts': posts, 'topics': topics,
-               'post_count': post_count, 'post_messages': post_messages}
+               'post_count': post_count, 'post_messages': post_messages,  }
     return render(request, 'base/home.html', context)
 
 
@@ -87,6 +91,11 @@ def post(request, pk):
     # model name lowercase, give set of messages related to the specific post
     post_messages = post.message_set.all()
     participants = post.participants.all()
+
+    post_obj = get_object_or_404(Post, pk=pk)
+    flag = False
+    if post_obj.likes.filter(id=request.user.id).exists():
+       flag = True
     if request.method == 'POST':
         message = Message.objects.create(
             user=request.user,
@@ -99,7 +108,7 @@ def post(request, pk):
 
 
     context = {'post': post, 'post_messages': post_messages,
-               'participants': participants}
+               'participants': participants, 'flag':flag}
     return render(request, 'base/post.html', context)
 
 
@@ -130,7 +139,7 @@ def userProfile(request,pk):
         user = User.objects.get(id=pk)
         posts = user.post_set.all()
         post_messages = user.message_set.all()
-
+        
         if request.method == "POST":
             current_user_profile = request.user.profile
             action = request.POST['follow']
@@ -169,6 +178,7 @@ def createPost(request):
             post = form.save(commit=False)  # saving in the database
             post.host = request.user  # host will be added based on whoever is logged in
             post.save()
+            messages.success(request, ("Posted a cat!"))
             return redirect('home')
 
     context = {'form': form}
@@ -218,3 +228,24 @@ def deleteMessage(request, pk):
         message.delete()
         return redirect('home')
     return render(request, 'base/delete.html', {'obj': message})
+
+
+@login_required(login_url='login')
+def updateUser(request):
+    current_user = User.objects.get(id=request.user.id)
+    profile_user = Profile.objects.get(user__id=request.user.id)
+    user_form = MyUserCreationForm(request.POST or None, request.FILES or None, instance=current_user)
+    profile_form = ProfilePicForm(request.POST or None, request.FILES or None, instance=profile_user)
+
+    if user_form.is_valid() and profile_form.is_valid():
+        user_form.save()
+        profile_form.save()
+
+        login(request, current_user)
+        messages.success(request, ("Your profile has been updated!"))
+        return redirect('home')
+
+    context={'user_form':user_form, 'profile_form':profile_form}
+    return render(request, 'base/update-user.html', context)
+
+

@@ -14,8 +14,8 @@
         </div>
         <div class="post-container">
 
-        <h1>{{post.name}}</h1>
-        <p>{{post.description}}</p>
+        <h1>{{post.name}}</h1><hr>
+        <p>{{post.description}}</p><hr>
 
 
         <div class="comment-wrapper">
@@ -33,6 +33,7 @@
                 </div>
             {% endfor %}
         </div>
+        <hr>
         {% if request.user.is_authenticated %}
         <div class="comment-form">
             <form method="POST" action="">

@@ -1,19 +1,41 @@
+{% load static %}
 <div>
+    
     {% for post in posts %}
         <div>
-
-            {% if request.user == post.host %}
-            <a href="{% url 'update-post' post.id %}">Edit</a>
-            <a href="{% url 'delete-post' post.id %}">Delete</a>
-            {% endif %}
-            <a href="{% url 'profile' post.host.id %}">@{{post.host.username}}</a>
-            <h5>{{post.id}} -- <a href="{% url 'post' post.id %}">{{post.name}}</a></h5>
-            <small>{{post.topic.name}}</small> 
-            <div id="like-section">
-                {% include 'base/like_section.html' %}
+            <div class="alert alert-light" role="alert">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-2">
+                            {% if post.host.profile.profile_image %}
+                            <img src="{{ post.host.profile.profile_image.url }}" width="50" height="50" class="rounded-circle">
+                            {% else %}
+                            <img src="{% static 'images/cat.jpg' %}" width="50" height="50" class="rounded-circle">
+                            {% endif %}
+                            <div id="like-section">
+                                {% include 'base/like_section.html' %}
+                          </div>
+                        </div>
+                    <div class="col-8">
+               
+                
+                <a href="{% url 'profile' post.host.id %}">@{{post.host.username}}</a>
+                
+                {% if request.user == post.host %}
+                <a href="{% url 'update-post' post.id %}">Edit</a>
+                <a href="{% url 'delete-post' post.id %}">Delete</a>
+                {% endif %}
+                <br/>
+                <h5> <a href="{% url 'post' post.id %}">{{post.name}}</a></h5>
+                <h8>{{post.description}}</h8><br/><br/>
+                <!-- <small>{{post.topic.name}}</small>  -->
+               
+              </div>
+                 </div>
+                </div>
             </div>
            
-            <hr>
+            
         </div>
     {% endfor %}
 </div>

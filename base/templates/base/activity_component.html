@@ -1,7 +1,10 @@
-<h3>Recent Activity</h3>
-<hr>
-{% for message in post_messages %}
-    <div>
+
+<div class="card">
+    <h5 class="card-header">Recent Activity</h5>
+    <div class="card-body">
+
+      <p class="card-text">
+        {% for message in post_messages %}
         <small><a href="{% url 'profile' message.user.id %}">@{{message.user.name}}</a>  {{message.created|timesince}}</small>
         <small>replied to "{{message.post}}"</small>
         <p>{{message}}</p>
@@ -9,5 +12,10 @@
         <a href="{% url 'delete-message' message.id %}">Delete</a>
         {% endif %}
         <hr>
+    
+        {% endfor %}
+      </p>
+      
     </div>
-{% endfor %}
+  </div>
+

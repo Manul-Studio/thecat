@@ -9,7 +9,6 @@ class Topic(models.Model):
         return self.name
 
 
-
 class User(AbstractUser):
     name = models.CharField(max_length=200, null=True)
     email = models.EmailField(unique=True)
@@ -23,6 +22,9 @@ class Profile(models.Model):
     follows= models.ManyToManyField("self", related_name="followed_by", symmetrical=False, blank=True) #symetrical= i can follow you but you dont have to follow me, blank=ou dobt have to follow anybody, related_name-opposite of follows
 
     date_modified = models.DateTimeField(User, auto_now=True)
+
+    profile_image = models.ImageField(null=True, blank=True, upload_to="images/")
+
     def __str__(self):
         return self.user.username
 
@@ -52,7 +54,7 @@ class Post(models.Model):
     def total_likes(self):
         return self.likes.count()
     class Meta:
-        ordering = ['-updated', '-created'] #od najnowszego
+        ordering = ['-created','-updated' ] #od najnowszego
 
     def __str__(self):
         return self.name

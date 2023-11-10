@@ -1,10 +1,19 @@
-<h3>Browse topic</h3>
-<hr>
-<div>
-    <a href="{% url 'home' %}">All</a>
-</div>
-{% for topic in topics %}
-<div>
-    <a href="{% url 'home' %}?q={{topic.name}}">{{topic.name}}</a>
-</div>
-{% endfor %}
+<div class="card">
+    <h5 class="card-header">Tags</h5>
+    <div class="card-body">
+
+      <p class="card-text">
+        <div>
+            <a href="{% url 'home' %}">All</a>
+        </div>
+        {% for topic in topics %}
+        <div>
+            <small><a href="{% url 'home' %}?q={{topic.name}}">#{{topic.name}}</a></small>
+        </div>
+        {% endfor %}
+      </p>
+      
+    </div>
+  </div>
+
+

@@ -1,33 +1,38 @@
 {% extends 'main.html' %}
 
 {% block content %}
-<style>
-    .home-container{
-        display: grid;
-        grid-template-columns: 1fr 3fr 1fr;
-    }
-</style>
-<h1></h1>
-<div class="home-container">
+<div class="container">
+    <div class="row">
+      <div class="col-sm-2">
+        <div class="home-container">
 
-    <div>
-        {% include 'base/topics_component.html' %}
-
-    </div>
-
-    <div>
-        <div>
-                <h5>{{post_count}} posts</h5>
-                <a href="{% url 'create-post' %}">Create post</a>
-
-                {% include 'base/feed_component.html' %}
+            <div>
+                {% include 'base/topics_component.html' %}
+        
+            </div>
+        
         </div>
-
-    
-
     </div>
-    <div>
-        {% include 'base/activity_component.html' %}
+
+
+
+    <div class="col-sm-6">
+        <h5>{{post_count}} posts</h5>
+        <a href="{% url 'create-post' %}">Create post</a>
+
+ 
+        {% include 'base/feed_component.html' %}
+    </div>
+  
+
+
+
+    <div class="col-sm-4">
+      {% include 'base/activity_component.html' %}
+
     </div>
 </div>
+</div>
+</div>
+
 {% endblock content %}
