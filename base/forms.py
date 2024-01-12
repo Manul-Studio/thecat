@@ -20,11 +20,12 @@ class PostForm(forms.ModelForm):
         label=""
     )
     name = forms.CharField(required=True)
+    image = forms.ImageField(label="Picture")
     
     class Meta:
         model = Post
         fields ='__all__'
-        exclude = ['host', 'participants', 'likes']
+        exclude = ['host', 'participants', 'likes', 'topic', 'hashtags']
 
 
 

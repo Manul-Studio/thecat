@@ -6,9 +6,9 @@
         <div>
             <a href="{% url 'home' %}">All</a>
         </div>
-        {% for topic in topics %}
+        {% for hashtag in hashtags %}
         <div>
-            <small><a href="{% url 'home' %}?q={{topic.name}}">#{{topic.name}}</a></small>
+            <small><a href="{% url 'home' %}?q={{hashtag.description}}">#{{hashtag.description}}</a></small>
         </div>
         {% endfor %}
       </p>

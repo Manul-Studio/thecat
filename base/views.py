@@ -4,11 +4,45 @@ from django.contrib.messages import constants as messages
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q
-from .models import Post, Topic, User, Message, Profile
+from .models import Post, User, Message, Profile, Hashtag, Location
 from django.contrib.auth import authenticate, login, logout
 from django.shortcuts import get_object_or_404
 from .forms import PostForm, MyUserCreationForm, ProfilePicForm
+from django.conf import settings
+import googlemaps
+import json
 
+
+
+def map(request):
+    if request.method == 'POST':
+        data = json.loads(request.body.decode('utf-8'))
+        latitude = data.get('latitude')
+        longitude = data.get('longitude')
+        city = data.get('city')
+        zipcode = data.get('zipcode')
+        country = data.get('country')
+        place_id = data.get('place_id')
+        street_name = data.get('street_name')
+        street_number = data.get('street_number')
+
+        address = str(street_name)+" "+str(street_number)+", "+str(zipcode) +" "+str(city) + ", " +str(country)
+
+        Location.objects.create(latitude=latitude, longitude=longitude, city=city, zipcode=zipcode, country=country, place_id=place_id, street_name=street_name, street_number=street_number, address=address)
+
+        return JsonResponse({'message': 'Location saved successfully'})
+    
+    locations = Location.objects.all()
+    
+    
+    key= settings.GOOGLE_API_KEY
+    context={'key':key, 'locations':locations}
+    return render(request, 'base/map.html', context)
+
+def mapLocations(request):
+    locations = Location.objects.all()
+    context={'locations':locations}
+    return render(request, 'base/map_locations.html', context)
 
 def loginPage(request):
     page = 'login'
@@ -65,7 +99,7 @@ def home(request):
     q = request.GET.get('q') if request.GET.get('q') != None else ''
 
     posts = Post.objects.filter(
-        Q(topic__name__icontains=q) |  # to albo to
+         # to albo to
         Q(name__icontains=q) |
         Q(description__icontains=q)|
         Q(host__name__icontains=q)
@@ -73,16 +107,16 @@ def home(request):
     )
     
 
-    topics = Topic.objects.all()
+    
     post_count = posts.count()
+    hashtags = Hashtag.objects.all()
     
    
    
     # only activity related to the topic
-    post_messages = Message.objects.filter(Q(post__topic__name__icontains=q))
+    post_messages = Message.objects.all()
 
-    context = {'posts': posts, 'topics': topics,
-               'post_count': post_count, 'post_messages': post_messages,  }
+    context = {'posts': posts, 'post_count': post_count, 'post_messages': post_messages, 'hashtags':hashtags }
     return render(request, 'base/home.html', context)
 
 
@@ -114,7 +148,7 @@ def post(request, pk):
 
 @login_required
 def likePost(request):
-    if request.method == 'POST' and request.is_ajax():
+    if request.method == 'POST' and request.headers.get('x-requested-with') == 'XMLHttpRequest':
         if request.POST.get('action') == 'post':
             flag = None
             postid = int(request.POST.get('post_id'))
@@ -169,15 +203,29 @@ def listProfile(request):
 
 
 @login_required(login_url='login')
+def hashtag(request, hash_pk):
+    hashtag = get_object_or_404(Hashtag, pk=hash_pk)
+    posts = hashtag.post_set.order_by('-pk')
+    context={'hashtag':hashtag, 'posts':posts}
+    return render(request, 'base/hashtag.html', context)
+
+@login_required(login_url='login')
 def createPost(request):
     form = PostForm()
 
     if request.method == 'POST':
-        form = PostForm(request.POST)  # passing all the data into the form
+        form = PostForm(request.POST, request.FILES)  # passing all the data into the form
+        image= request.FILES.get('image')
         if form.is_valid():
             post = form.save(commit=False)  # saving in the database
             post.host = request.user  # host will be added based on whoever is logged in
             post.save()
+            for word in post.description.split():
+                if word.startswith('#'):
+                    hashtag_text = word[1:]
+                    hashtag, created = Hashtag.objects.get_or_create(description=hashtag_text)
+                    post.hashtags.add(hashtag)
+
             messages.success(request, ("Posted a cat!"))
             return redirect('home')
 
@@ -195,12 +243,18 @@ def updatePost(request, pk):
 
     if request.method == 'POST':
         # zeby zupdateowało właściwy post a nie dodawalo nowy
-        form = PostForm(request.POST, instance=post)
+        form = PostForm(request.POST, request.FILES, instance=post)
         if form.is_valid():
             form.save()
+            post.hashtags.clear()
+            for word in post.description.split():
+                if word.startswith('#'):
+                    hashtag_text = word[1:]
+                    hashtag, created = Hashtag.objects.get_or_create(description=hashtag_text)
+                    post.hashtags.add(hashtag)
             return redirect('home')
 
-    context = {'form': form}
+    context = {'form': form, 'post':post}
     return render(request, 'base/post_form.html', context)
 
 
@@ -232,20 +286,36 @@ def deleteMessage(request, pk):
 
 @login_required(login_url='login')
 def updateUser(request):
-    current_user = User.objects.get(id=request.user.id)
-    profile_user = Profile.objects.get(user__id=request.user.id)
-    user_form = MyUserCreationForm(request.POST or None, request.FILES or None, instance=current_user)
-    profile_form = ProfilePicForm(request.POST or None, request.FILES or None, instance=profile_user)
+    user = request.user
+    profile = request.user
+    user_form = MyUserCreationForm(instance=user)
+    profile_form = ProfilePicForm(instance=user)
 
-    if user_form.is_valid() and profile_form.is_valid():
-        user_form.save()
-        profile_form.save()
+    if request.method == 'POST':
+        user_form = MyUserCreationForm(request.POST, instance=user)
+        profile_form = ProfilePicForm(request.FILES, instance=user)
+        if user_form.is_valid() and profile_form.is_valid():
+            user_form.save()
+            profile_form.save()
+            return redirect('user-profile', pk=user.id)
 
-        login(request, current_user)
-        messages.success(request, ("Your profile has been updated!"))
-        return redirect('home')
+    return render(request, 'base/update-user.html', {'user_form':user_form, 'profile_form':profile_form})
 
-    context={'user_form':user_form, 'profile_form':profile_form}
-    return render(request, 'base/update-user.html', context)
+    # current_user = User.objects.get(id=request.user.id)
+    # profile_user = Profile.objects.get(user__id=request.user.id)
+    # user_form = MyUserCreationForm(request.POST or None, request.FILES or None, instance=current_user)
+    # profile_form = ProfilePicForm(request.POST or None, request.FILES or None, instance=profile_user)
+    # if request.method == 'POST':
+        
+    #     if user_form.is_valid() and profile_form.is_valid():
+    #         user_form.save()
+    #         profile_form.save()
+
+    #         login(request, current_user)
+    #         messages.success(request, ("Your profile has been updated!"))
+    #         return redirect('home')
+
+    # context={'user_form':user_form, 'profile_form':profile_form}
+    # return render(request, 'base/update-user.html', context)
 
 

@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from.models import User, Post, Topic, Message, Profile
+from.models import User, Post, Message, Profile, Hashtag, Location
 
 
 
@@ -15,5 +15,7 @@ class UserAdmin(admin.ModelAdmin):
 
 admin.site.register(User, UserAdmin)
 admin.site.register(Post)
-admin.site.register(Topic)
+
 admin.site.register(Message)
+admin.site.register(Hashtag)
+admin.site.register(Location)

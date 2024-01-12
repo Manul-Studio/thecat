@@ -1,5 +1,5 @@
 {% extends 'main.html' %}
-
+{% load make_link %}
 {% block content %}
 <style>
     .post-container{
@@ -15,7 +15,8 @@
         <div class="post-container">
 
         <h1>{{post.name}}</h1><hr>
-        <p>{{post.description}}</p><hr>
+        <p>{{ post|hashtag_link|safe }}</p>
+            
 
 
         <div class="comment-wrapper">

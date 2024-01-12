@@ -1,4 +1,5 @@
 {% load static %}
+{% load make_link %}
 <div>
     
     {% for post in posts %}
@@ -20,6 +21,16 @@
                
                 
                 <a href="{% url 'profile' post.host.id %}">@{{post.host.username}}</a>
+                {% if post.location %}
+                <a id="post-location-link" href="{% url 'map' %}" class="address-link"
+                   data-latitude="{{ post.location.latitude }}"
+                   data-longitude="{{ post.location.longitude }}"
+                   data-city="{{ post.location.city }}"
+                   data-country="{{ post.location.country }}"
+                   data-street-name="{{ post.location.street_name }}"
+                   data-street-number="{{ post.location.street_number }}">
+                  {{ post.location.address }}
+                  {% endif %}
                 
                 {% if request.user == post.host %}
                 <a href="{% url 'update-post' post.id %}">Edit</a>
@@ -27,7 +38,14 @@
                 {% endif %}
                 <br/>
                 <h5> <a href="{% url 'post' post.id %}">{{post.name}}</a></h5>
-                <h8>{{post.description}}</h8><br/><br/>
+                
+                {% if post.image %}
+                    <img src="{{ post.image.url }}" 
+                    height="200">    <br/><br/>
+                {% endif %}
+                <p>{{ post|hashtag_link|safe }}</p>
+               <br/><br/>
+                
                 <!-- <small>{{post.topic.name}}</small>  -->
                
               </div>

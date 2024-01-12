@@ -1,0 +1,23 @@
+{% extends 'main.html' %}
+{% load static %}
+{% block content %}
+<script src="https://polyfill.io/v3/polyfill.min.js?features=default"></script>
+<div class="mapholder"> 
+<div id="map"></div>
+<script src="{% static 'styles/script.js' %}"></script>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCjVFI00bbqPQJ6K1wB3fdIEos56UJRbNc&callback=initMap"></script>
+
+
+{% for location in locations %}
+<a href="{% url 'map' %}" class="address-link"
+data-latitude="{{ location.latitude }}"
+data-longitude="{{ location.longitude }}"
+data-city="{{ location.city }}"
+data-country="{{ location.country }}"
+data-street-name="{{ location.street_name }}"
+data-street-number="{{ location.street_number }}">
+{{location.address}}</a>
+{% endfor %}
+</div>
+
+{% endblock content %}

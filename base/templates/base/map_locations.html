@@ -1,0 +1,17 @@
+{% extends 'main.html' %}
+
+{% block content %}
+
+{% for location in locations %}
+<a href="{% url 'map' %}" class="address-link"
+data-latitude="{{ location.latitude }}"
+data-longitude="{{ location.longitude }}"
+data-city="{{ location.city }}"
+data-country="{{ location.country }}"
+data-street-name="{{ location.street_name }}"
+data-street-number="{{ location.street_number }}">
+{{location.address}}</a>
+{% endfor %}
+</div>
+
+{% endblock content %}

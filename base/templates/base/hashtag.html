@@ -1,0 +1,13 @@
+{% extends 'main.html' %}
+{% block content %}
+
+<hr>
+<div>
+    <h2>{{ hashtag.description }}</h2>
+    {% for post in posts %}
+   
+    <a href="{% url 'post' post.pk %}">{{ post.name }}</a>
+    <hr>
+    {% endfor %}
+</div>
+{% endblock content %}
