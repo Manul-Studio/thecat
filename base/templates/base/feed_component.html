@@ -1,5 +1,6 @@
 {% load static %}
 {% load make_link %}
+
 <div>
     
     {% for post in posts %}
@@ -9,7 +10,7 @@
                     <div class="row">
                         <div class="col-2">
                             {% if post.host.profile.profile_image %}
-                            <img src="{{ post.host.profile.profile_image.url }}" width="50" height="50" class="rounded-circle">
+                            <a href="{% url 'profile' post.host.id %}"><img src="{{ post.host.profile.profile_image.url }}" width="50" height="50" class="rounded-circle"></a>
                             {% else %}
                             <img src="{% static 'images/cat.jpg' %}" width="50" height="50" class="rounded-circle">
                             {% endif %}
@@ -20,9 +21,9 @@
                     <div class="col-8">
                
                 
-                <a href="{% url 'profile' post.host.id %}">@{{post.host.username}}</a>
+                <a href="{% url 'profile' post.host.id %}">@{{post.host.username}}</a><br>
                 {% if post.location %}
-                <a id="post-location-link" href="{% url 'map' %}" class="address-link"
+                <a id="post-location-link" href="{% url 'map'  %}?latitude={{post.location.latitude}}&longitude={{post.location.longitude}}" class="address-link"
                    data-latitude="{{ post.location.latitude }}"
                    data-longitude="{{ post.location.longitude }}"
                    data-city="{{ post.location.city }}"

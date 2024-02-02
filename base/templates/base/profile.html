@@ -4,7 +4,7 @@
 
 {% if profile %}
 
-    <h1>{{profile.user.username}}</h1>
+    
 
    
       <div class="container">
@@ -14,7 +14,10 @@
               <div class="profile-container">
                     {% if profile.profile_image %}
                     <img src="{{ profile.profile_image.url }}" class="rounded-circle" width="200" 
-                    height="200">    <br/><br/>
+                    height="200"> <br><br>
+                    <div class="card">
+                    <h5 class="card-header">{{profile.user.username}}</h5> </div>  <br/>
+                    
                     {% endif %}
                 
                     <div class="card">

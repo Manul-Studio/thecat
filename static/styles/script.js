@@ -4,12 +4,15 @@ let geocoder;
 let responseDiv;
 let response;
 
+
+
 function initMap() {
   map = new google.maps.Map(document.getElementById("map"), {
     center: { lat: 51.107546, lng: 17.0382034 },
     zoom: 6,
   });
   infoWindow = new google.maps.InfoWindow();
+  geocoder = new google.maps.Geocoder();
 
   const locationButton = document.createElement("button");
 
@@ -159,6 +162,7 @@ function initMap() {
     return null;
   }
 
+
   function createMarkerForLocation(location) {
     console.log("Creating marker for location:", location);
 
@@ -173,30 +177,53 @@ function initMap() {
     const addressLinks = document.querySelectorAll('.address-link');
 
     addressLinks.forEach(function (link) {
-      link.addEventListener('click', function (e) {
-        e.preventDefault();
+        link.addEventListener('click', function (e) {
+            e.preventDefault();
 
-        const locationData = {
-          latitude: link.dataset.latitude,
-          longitude: link.dataset.longitude,
-          city: link.dataset.city,
-          country: link.dataset.country,
-          street_name: link.dataset.streetName,
-          street_number: link.dataset.streetNumber,
-          address: link.innerText, // Assuming the address is displayed as text in the link
-        };
+            const locationData = {
+                latitude: link.dataset.latitude,
+                longitude: link.dataset.longitude,
+                city: link.dataset.city,
+                country: link.dataset.country,
+                street_name: link.dataset.streetName,
+                street_number: link.dataset.streetNumber,
+                address: link.innerText,
+            };
 
-        console.log("Link clicked:", locationData);
+            console.log("Link clicked:", locationData);
 
-        // Assuming you have a geocode function
-        geocode({ location: new google.maps.LatLng(locationData.latitude, locationData.longitude) });
+            // Assuming you have a geocode function
+            geocode({ location: new google.maps.LatLng(locationData.latitude, locationData.longitude) });
 
-        // Create marker for the clicked location
-        createMarkerForLocation(locationData);
-      });
+            // Create marker for the clicked location
+            createMarkerForLocation(locationData);
+        });
     });
+
+    // Get latitude and longitude from the URL
+    const latitude = parseFloat(getParameterByName('latitude'));
+    const longitude = parseFloat(getParameterByName('longitude'));
+
+    console.log("Latitude:", latitude, "Longitude:", longitude);
+
+    // Create a map centered at the specified location
+    if (!isNaN(latitude) && !isNaN(longitude)) {
+      // Create a map centered at the specified location
+      const map = new google.maps.Map(document.getElementById('map'), {
+          center: { lat: latitude, lng: longitude },
+          zoom: 15
+      });
+
+    // Create a marker for the specified location
+    const marker = new google.maps.Marker({
+      position: { lat: latitude, lng: longitude },
+      map: map,
+      title: 'Marker Title'
   });
 }
+});
+}
+
 function saveLocationToDatabase(data) {
   // Send a POST request to the Django server to save the location
   fetch("/map/", {
@@ -238,3 +265,13 @@ function handleLocationError(browserHasGeolocation, infoWindow, pos) {
 }
 
 window.initMap = initMap;
+
+function getParameterByName(name, url) {
+  if (!url) url = window.location.href;
+  name = name.replace(/[\[\]]/g, "\\$&");
+  var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
+      results = regex.exec(url);
+  if (!results) return null;
+  if (!results[2]) return '';
+  return decodeURIComponent(results[2].replace(/\+/g, " "));
+}

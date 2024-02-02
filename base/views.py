@@ -105,7 +105,8 @@ def home(request):
         Q(host__name__icontains=q)
 
     )
-    
+    for post in posts:
+        post.liked = post.isLikedByUser(request.user.id)
 
     
     post_count = posts.count()
@@ -122,14 +123,12 @@ def home(request):
 
 def post(request, pk):
     post = Post.objects.get(id=pk)
+    post.liked = post.isLikedByUser(request.user.id)
     # model name lowercase, give set of messages related to the specific post
     post_messages = post.message_set.all()
     participants = post.participants.all()
-
     post_obj = get_object_or_404(Post, pk=pk)
-    flag = False
-    if post_obj.likes.filter(id=request.user.id).exists():
-       flag = True
+    
     if request.method == 'POST':
         message = Message.objects.create(
             user=request.user,
@@ -142,7 +141,7 @@ def post(request, pk):
 
 
     context = {'post': post, 'post_messages': post_messages,
-               'participants': participants, 'flag':flag}
+               'participants': participants}
     return render(request, 'base/post.html', context)
 
 

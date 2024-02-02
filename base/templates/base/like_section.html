@@ -14,7 +14,7 @@
 
     
 <div class="bg-light py-2 px-3 ml-2 mb-1" style="display: inline-block; border-radius: 20px;">
-   {% if flag %}
+   {% if post.liked %}
     <button type="submit" id="{{ post.pk }}" data-url="{% url 'like-post' %}" class="btn border-0 likebtn m-0 p-0">
         <i class="bi bi-heart-fill"></i>
     </button>

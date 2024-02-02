@@ -63,7 +63,7 @@ class Post(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     likes = models.ManyToManyField(User, blank=True, related_name='likes') 
     location = models.ForeignKey(Location, null=True, blank=True, on_delete=models.SET_NULL)
-
+    liked = True
     @property
     def total_likes(self):
         return self.likes.count()
@@ -74,6 +74,9 @@ class Post(models.Model):
         name_str = self.name if self.name else "No Name"
         location_str = str(self.location) if self.location is not None else "No Location"
         return f"{name_str} - {location_str}"
+    
+    def isLikedByUser(self, user_id) ->bool:
+        return self.likes.filter(id=user_id).exists()
 
 class Message(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
